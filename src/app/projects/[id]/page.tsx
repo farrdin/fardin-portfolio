@@ -1,8 +1,9 @@
 "use client";
 
-import { notFound, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 const projects = [
   {
@@ -133,15 +134,56 @@ const projects = [
   },
 ];
 
-export default function ProjectDetailsPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const project = projects.find((p) => p.id === parseInt(params.id));
-  const router = useRouter();
+type Project = {
+  id: number;
+  title: string;
+  image: string;
+  description: string;
+  features: string[];
+  technologies: string[];
+  role: string;
+  tools: string[];
+  duration: string;
+  challenges: string;
+  githubLink: string;
+  liveLink: string;
+};
 
-  if (!project) return notFound();
+export default function ProjectDetailsPage() {
+  const params = useParams();
+  const router = useRouter();
+  const [project, setProject] = useState<Project | null>(null);
+
+  useEffect(() => {
+    if (!params?.id) return;
+
+    const idParam = Array.isArray(params.id) ? params.id[0] : params.id;
+    const idNum = parseInt(idParam, 10);
+    if (isNaN(idNum)) {
+      setProject(null);
+      return;
+    }
+
+    const foundProject = projects.find((p) => p.id === idNum);
+    setProject(foundProject || null);
+  }, [params]);
+
+  if (!project) {
+    return (
+      <div
+        style={{ background: "var(--gradient-main)" }}
+        className="min-h-screen flex flex-col items-center justify-center text-white px-6 py-12 "
+      >
+        <h1 className="text-3xl font-bold mb-4">Project Not Found</h1>
+        <button
+          onClick={() => router.push("/")}
+          className="px-4 py-2 bg-[#B3E9FA] text-black rounded-md hover:bg-white transition"
+        >
+          ← Back to Home
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div
